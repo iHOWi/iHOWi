@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOID ENGINE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            overflow-x: hidden;
+            color: white;
+            background-color: #111;
+        }
+        
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            filter: brightness(0.7);
+        }
+        
+        #enter-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: all 1s ease-out;
+        }
+        
+        #enter-button {
+            padding: 15px 40px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        #enter-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            transform: scale(1.05);
+        }
+        
+        .content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+        }
+        
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            display: block;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 400;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+        
+        .friends-list, .hobby-list, .clans-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .friend-tag, .hobby-tag, .clan-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .friend-tag:hover, .hobby-tag:hover, .clan-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .clan-tag {
+            font-weight: 600;
+        }
+        
+        /* Scroll animations */
+        .panel:nth-child(odd) {
+            transform: translateX(-50px);
+        }
+        
+        .panel:nth-child(even) {
+            transform: translateX(50px);
+        }
+        
+        .panel.show {
+            transform: translateX(0) !important;
+        }
+        
+        /* Audio player styling */
+        #audio-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        
+        #audio-player:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        #audio-player i {
+            font-size: 18px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <video autoplay muted loop id="video-background">
+        <source src="files/1.mp4" type="video/mp4">
+    </video>
+    
+    <audio id="bg-music" loop>
+        <source src="files/1.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="enter-screen">
+        <h1 style="margin-bottom: 30px; font-size: 3rem;">VOID ENGINE</h1>
+        <button id="enter-button">Click to Enter</button>
+    </div>
+    
+    <div class="content" id="main-content">
+        <div class="panel">
+            <img src="files/1.jpg" alt="Avatar" class="avatar">
+            <h1>HOW?</h1>
+            <p class="subtitle">блаблаблаблеблебле</p>
+        </div>
+        
+        <div class="panel">
+            <h2>FRIENDS</h2>
+            <div class="friends-list">
+                <span class="friend-tag">@MihailSecuritu 💎</span>
+                <span class="friend-tag">@ImGui_Paster</span>
+                <span class="friend-tag">@LukaDed</span>
+                <span class="friend-tag">@froskya_2OO4</span>
+                <span class="friend-tag">@IKONAweb</span>
+                <span class="friend-tag">@MishkaBearry</span>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>HOBBY</h2>
+            <div class="hobby-list">
+                <span class="hobby-tag">#modmaking</span>
+                <span class="hobby-tag">#FLstudio</span>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Clans</h2>
+            <div class="clans-list">
+                <span class="clan-tag">#𝐙𝐞𝐂𝐎𝐃𝐄</span>
+                <span class="clan-tag">#EY</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="audio-player" title="Toggle Music">
+        <i class="fas fa-music"></i>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const enterButton = document.getElementById('enter-button');
+            const enterScreen = document.getElementById('enter-screen');
+            const mainContent = document.getElementById('main-content');
+            const bgMusic = document.getElementById('bg-music');
+            const audioPlayer = document.getElementById('audio-player');
+            const panels = document.querySelectorAll('.panel');
+            
+            // Enter button click handler
+            enterButton.addEventListener('click', function() {
+                // Fade out entrance screen
+                enterScreen.style.opacity = '0';
+                
+                // Start playing music quietly
+                bgMusic.volume = 0.3;
+                bgMusic.play().catch(e => console.log("Autoplay prevented:", e));
+                
+                // Remove entrance screen after animation
+                setTimeout(() => {
+                    enterScreen.style.display = 'none';
+                    mainContent.classList.add('show');
+                    
+                    // Animate panels one by one
+                    panels.forEach((panel, index) => {
+                        setTimeout(() => {
+                            panel.classList.add('show');
+                        }, index * 200);
+                    });
+                }, 1000);
+            });
+            
+            // Audio player toggle
+            audioPlayer.addEventListener('click', function() {
+                if (bgMusic.paused) {
+                    bgMusic.play();
+                    this.innerHTML = '<i class="fas fa-music"></i>';
+                } else {
+                    bgMusic.pause();
+                    this.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                }
+            });
+            
+            // Scroll animations
+            function checkScroll() {
+                panels.forEach(panel => {
+                    const panelTop = panel.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (panelTop < windowHeight * 0.75) {
+                        panel.classList.add('show');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', checkScroll);
+            checkScroll(); // Check on load
+        });
+    </script>
+</body>
+</html>
